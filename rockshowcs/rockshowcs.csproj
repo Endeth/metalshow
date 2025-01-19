@@ -200,8 +200,8 @@
     <Compile Include="Forms\GfxOutputForm.Designer.cs">
       <DependentUpon>GfxOutputForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Nodes\AudioTask.cs" />
-    <Compile Include="IAudioBufferDepr.cs" />
+    <Compile Include="Nodes\AudioNode.cs" />
+    <Compile Include="AudioBuffers.cs" />
     <Compile Include="AudioDevice.cs" />
     <Compile Include="AudioInput\AudioDeviceInputStream.cs" />
     <Compile Include="AudioInput\AudioStream.cs" />

@@ -24,9 +24,9 @@ namespace Metalshow
             _processor.SetInputDevice( inputDevice );
         }
 
-        public IncrementingNode CreateListener()
+        public PeakNode CreateListener()
         {
-            testListener = new IncrementingNode();
+            testListener = new PeakNode(null);
             _processor.AddNode( testListener );
 
             loudnessCtrl = new LoudnessOutputControl();
@@ -52,7 +52,7 @@ namespace Metalshow
             return testListener;
         }
 
-        public void RemoveListener( IncrementingNode listener)
+        public void RemoveListener( PeakNode listener)
         {
             testListener = null;
             _processor.RemoveNode( listener );
@@ -71,7 +71,7 @@ namespace Metalshow
             _processor.CleanUp();
         }
 
-        IncrementingNode testListener;
+        PeakNode testListener;
         LoudnessOutputControl loudnessCtrl;
         SpectogramOutputControl spectCtrl;
 

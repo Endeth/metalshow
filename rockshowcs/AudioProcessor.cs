@@ -1,6 +1,7 @@
 ﻿using Metalshow.AudioInput;
 using Metalshow.Nodes;
 using Metalshow.Signal;
+using NAudio.SoundFont;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,8 @@ namespace Metalshow
         public AudioProcessor()
         {
             waveFormat = new WaveFormat( 44100, 16, 1 );
-            _inputNode = new AudioInputNode( waveFormat, 0 );
+            _inputNode = new DeviceReaderNode( null, waveFormat, 0 );
+            _sampleReader = new WaveSampleReader( _inputNode, 1024, 16_000 );
 
             bufferSize = 1024 * waveFormat.Channels;
             //frameRate = waveFormat.SampleRate / bufferSize;
@@ -31,12 +33,17 @@ namespace Metalshow
 
             if( _inputNode != null )
             {
-                _inputNode.Active = true;
+                _inputNode.Start();
+            }
+
+            if( _sampleReader != null )
+            {
+                _sampleReader.Start();
             }
 
             if(_audioListener != null)
             {
-                _audioListener.Active = true;
+                _audioListener.Start();
             }
         }
 
@@ -44,12 +51,17 @@ namespace Metalshow
         {
             if( _audioListener != null )
             {
-                _audioListener.Active = false;
+                _audioListener.Stop();
+            }
+
+            if( _sampleReader != null )
+            {
+                _sampleReader.Stop();
             }
 
             if( _inputNode != null )
             {
-                _inputNode.Active = false;
+                _inputNode.Stop();
             }
 
             mainLoopTimer.Stop();
@@ -62,6 +74,11 @@ namespace Metalshow
         {
             if( Active )
             {
+                if( _sampleReader != null )
+                {
+                    _sampleReader.Tick();
+                }
+
                 if( _audioListener != null )
                 {
                     _audioListener.Tick();
@@ -75,7 +92,7 @@ namespace Metalshow
             {
                 return;
             }
-            _inputNode = new Nodes.AudioInputNode( waveFormat, 0 );
+            _inputNode = new DeviceReaderNode( null, waveFormat, 0 );
         }
 
         public void SetInputDevice( int id )
@@ -88,13 +105,13 @@ namespace Metalshow
             _inputNode.SetDevice( id );
         }
 
-        public void AddNode( IncrementingNode node )
+        public void AddNode( PeakNode node )
         {
-            node.Parent = _inputNode;
+            node.Parent = _sampleReader;
             _audioListener = node;
         }
 
-        public void RemoveNode( IncrementingNode node )
+        public void RemoveNode( PeakNode node )
         {
             _audioListener = null;
         }
@@ -171,7 +188,7 @@ namespace Metalshow
         //private float[] samplesBuffer = new float[8192];
         /*private int WavToSamples( BufferedWaveProvider wav, double[] samples, int count, double multiplier = 16_000 )
         {
-            var sampleProvider = waveProvider.ToSampleProvider();
+            var sampleProvider = wav.ToSampleProvider();
             int samplesRead = sampleProvider.Read( samplesBuffer, 0, count );
 
             for( int i = 0; i < samplesRead; i++ )
@@ -182,8 +199,9 @@ namespace Metalshow
             return samplesRead;
         }*/
 
-        private Nodes.AudioInputNode _inputNode;
-        private IncrementingNode _audioListener;
+        private DeviceReaderNode _inputNode;
+        private WaveSampleReader _sampleReader;
+        private PeakNode _audioListener;
 
         //private AudioDeviceInputStream inputStream;
         //private List<IOutputStream> outputStreams;

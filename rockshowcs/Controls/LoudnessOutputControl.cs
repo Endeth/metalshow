@@ -26,7 +26,7 @@ namespace Metalshow.Controls
             base.AdjustParentForm( parent );
         }
 
-        public void SetAudioListener( IInputNode<float> listener )
+        public void SetAudioListener( IInputNode<double> listener )
         {
             _listener = listener;
         }
@@ -35,8 +35,8 @@ namespace Metalshow.Controls
         {
             if( _listener != null )
             {
-                float val = 0.0f;
-                _listener.Get( ref val );
+                double val = 0.0f;
+                _listener.GetResult( ref val );
                 ListenerValue.Text = val.ToString();
             }
         }
@@ -51,7 +51,7 @@ namespace Metalshow.Controls
             _listener = null;
         }
 
-        private IInputNode<float> _listener;
+        private IInputNode<double> _listener;
         private Timer _timer;
     }
 }

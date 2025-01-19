@@ -13,11 +13,13 @@ namespace Metalshow
         }
         override protected void OnDataAvailable( object source, WaveInEventArgs args )
         {
+            /*
             lock( buffer )
             {
                 waveProvider.AddSamples( args.Buffer, 0, args.Buffer.Length );
                 buffer.Write( args.Buffer, 0, args.Buffer.Length );
             }
+            */
         }
 
         public void SetInputDevice( int deviceIdx )

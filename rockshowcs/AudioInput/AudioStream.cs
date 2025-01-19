@@ -57,21 +57,8 @@ namespace Metalshow.AudioInput
 
         protected bool isStreaming = false;
         protected BufferedWaveProvider waveProvider;
-        protected IAudioBufferDepr buffer;
+        //protected IAudioBufferDepr buffer;
 
         protected List<IOutputReceiver> receivers;
-    }
-
-    public class AudioReadEventArgs : EventArgs
-    {
-        public AudioReadEventArgs( IAudioBufferDepr buffer )
-        {
-            Buffer = buffer;
-        }
-
-        public IAudioBufferDepr Buffer
-        {
-            get;
-        }
     }
 }
