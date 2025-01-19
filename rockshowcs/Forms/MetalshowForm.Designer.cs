@@ -39,6 +39,7 @@
             this.AnalyzerCheckBox = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.InputDevicesComboBox = new System.Windows.Forms.ComboBox();
+            this.CreateInputButton = new System.Windows.Forms.Button();
             this.InputBackground.SuspendLayout();
             this.panel1.SuspendLayout();
             this.LoudnessPanel.SuspendLayout();
@@ -49,18 +50,19 @@
             // InputBackground
             // 
             this.InputBackground.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.InputBackground.Controls.Add(this.CreateInputButton);
             this.InputBackground.Controls.Add(this.StreamToggle);
             this.InputBackground.Controls.Add(this.panel1);
             this.InputBackground.Controls.Add(this.label1);
             this.InputBackground.Controls.Add(this.InputDevicesComboBox);
-            this.InputBackground.Location = new System.Drawing.Point(39, 57);
+            this.InputBackground.Location = new System.Drawing.Point(39, 30);
             this.InputBackground.Name = "InputBackground";
-            this.InputBackground.Size = new System.Drawing.Size(219, 557);
+            this.InputBackground.Size = new System.Drawing.Size(219, 584);
             this.InputBackground.TabIndex = 0;
             // 
             // StreamToggle
             // 
-            this.StreamToggle.Location = new System.Drawing.Point(54, 494);
+            this.StreamToggle.Location = new System.Drawing.Point(54, 532);
             this.StreamToggle.Name = "StreamToggle";
             this.StreamToggle.Size = new System.Drawing.Size(109, 37);
             this.StreamToggle.TabIndex = 1;
@@ -74,7 +76,7 @@
             this.panel1.Controls.Add(this.LoudnessPanel);
             this.panel1.Controls.Add(this.SpectPanel);
             this.panel1.Controls.Add(this.AnalyzerPanel);
-            this.panel1.Location = new System.Drawing.Point(16, 76);
+            this.panel1.Location = new System.Drawing.Point(16, 118);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(187, 395);
             this.panel1.TabIndex = 2;
@@ -142,7 +144,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(87, 22);
+            this.label1.Location = new System.Drawing.Point(88, 11);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(41, 13);
             this.label1.TabIndex = 1;
@@ -156,6 +158,16 @@
             this.InputDevicesComboBox.Size = new System.Drawing.Size(147, 21);
             this.InputDevicesComboBox.TabIndex = 0;
             this.InputDevicesComboBox.SelectedIndexChanged += new System.EventHandler(this.InputDeviceComboBox_SelectedIndexChanged);
+            // 
+            // CreateInputButton
+            // 
+            this.CreateInputButton.Location = new System.Drawing.Point(70, 79);
+            this.CreateInputButton.Name = "CreateInputButton";
+            this.CreateInputButton.Size = new System.Drawing.Size(75, 23);
+            this.CreateInputButton.TabIndex = 3;
+            this.CreateInputButton.Text = "Create Input";
+            this.CreateInputButton.UseVisualStyleBackColor = true;
+            this.CreateInputButton.Click += new System.EventHandler(this.CreateInputButton_Click);
             // 
             // MetalshowForm
             // 
@@ -192,5 +204,6 @@
         private System.Windows.Forms.CheckBox AnalyzerCheckBox;
         private System.Windows.Forms.CheckBox LoudnessCheckBox;
         private System.Windows.Forms.CheckBox SpectogramCheckBox;
+        private System.Windows.Forms.Button CreateInputButton;
     }
 }

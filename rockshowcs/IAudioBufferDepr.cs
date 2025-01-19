@@ -5,7 +5,7 @@ namespace Metalshow
     /*
     AudioBuffer - 
     */
-    public interface IAudioBuffer
+    public interface IAudioBufferDepr
     {
         MemoryStream GetReadable();
         MemoryStream GetWriteable();
@@ -17,9 +17,9 @@ namespace Metalshow
         void ReadComplete();
     }
 
-    public class SingleAudioBuffer : IAudioBuffer
+    public class SingleAudioBufferDepr : IAudioBufferDepr
     {
-        public SingleAudioBuffer( int bufferCapacity )
+        public SingleAudioBufferDepr( int bufferCapacity )
         {
             capacity = bufferCapacity;
             size = 0;
@@ -65,9 +65,9 @@ namespace Metalshow
     }
 
     //Not implemented
-    public class DoubleAudioBuffer : IAudioBuffer
+    public class DoubleAudioBufferDepr : IAudioBufferDepr
     {
-        public DoubleAudioBuffer( int bufferCapacity )
+        public DoubleAudioBufferDepr( int bufferCapacity )
         {
             capacity = bufferCapacity;
             readIdx = 0;

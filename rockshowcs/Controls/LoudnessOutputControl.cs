@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Metalshow.Nodes;
+using System;
 using System.Windows.Forms;
 
 namespace Metalshow.Controls
@@ -10,7 +11,6 @@ namespace Metalshow.Controls
             InitializeComponent();
 
             Name = "Loudness";
-            Type = OutputType.Loudness;
 
             _timer = new Timer
             {
@@ -26,17 +26,18 @@ namespace Metalshow.Controls
             base.AdjustParentForm( parent );
         }
 
-        public void SetAudioListener( Nodes.AudioListener<Nodes.AudioInputTaskNode, bool> listener )
+        public void SetAudioListener( IInputNode<float> listener )
         {
             _listener = listener;
         }
 
         override public void OnUITick( object sender, EventArgs args)
         {
-            Console.WriteLine( "tick" );
             if( _listener != null )
             {
-                Console.WriteLine( _listener.Get() );
+                float val = 0.0f;
+                _listener.Get( ref val );
+                ListenerValue.Text = val.ToString();
             }
         }
 
@@ -50,7 +51,7 @@ namespace Metalshow.Controls
             _listener = null;
         }
 
-        private Nodes.AudioListener<Nodes.AudioInputTaskNode, bool> _listener;
+        private IInputNode<float> _listener;
         private Timer _timer;
     }
 }

@@ -15,12 +15,13 @@ namespace Metalshow
 
         GfxOutputControl outputControl;
     }
+
     public class GfxOutputFormToggleEventArgs : EventArgs
     {
-        public GfxOutputFormToggleEventArgs( GfxOutputControl ctrl, bool val, EventHandler cb )
+        public GfxOutputFormToggleEventArgs( GfxOutputControl ctrl, bool create, EventHandler cb )
         {
             GfxOutputControl = ctrl;
-            Value = val;
+            Create = create;
             OnExitCb = cb;
         }
 
@@ -34,7 +35,7 @@ namespace Metalshow
             get;
         }
 
-        public bool Value
+        public bool Create
         {
             get;
         }

@@ -31,19 +31,11 @@ namespace Metalshow
         }
         public void OnUITick( object source, EventArgs args )
         {
-            foreach( var uiTask in uiTasks )
-            {
-                //Copy data from input streams to input children
-            }
-
-            //Start ops
-            
-            //
         }
 
         public void ToggleOutputForm( GfxOutputFormToggleEventArgs args )
         {
-            if( args.Value )
+            if( args.Create )
             {
                 var toggledForm = new GfxOutputForm( args.GfxOutputControl );
                 toggledForm.Name = args.GfxOutputControl.OutputName;
@@ -84,7 +76,5 @@ namespace Metalshow
         private readonly Timer uiFrameTimer;
         private readonly int frameRate;
         private readonly int timerInterval;
-
-        private List<Nodes.AudioTask> uiTasks;
     }
 }

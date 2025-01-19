@@ -41,6 +41,11 @@ namespace Metalshow.Forms
             metalshowController.SetInputDevice( InputDevicesComboBox.SelectedIndex );
         }
 
+        private void CreateInputButton_Click( object sender, EventArgs e )
+        {
+            metalshowController.CreateInput( InputDevicesComboBox.SelectedIndex );
+        }
+
         private void AnalyzerCheckBox_CheckedChanged( object sender, EventArgs e )
         {
         }

@@ -3,13 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace Metalshow.Nodes
 {
-    public interface IProcessingNode
+    public interface INode
     {
-        void AddChild(IProcessingNode childNode);
-        void RemoveChild( IProcessingNode childNode );
+        void AddChild(INode childNode);
+        void RemoveChild( INode childNode );
         void Delete();
 
         bool Active
@@ -18,18 +19,29 @@ namespace Metalshow.Nodes
             set;
         }
 
-        IProcessingNode Parent
+        INode Parent
         {
             get;
+            set;
         }
 
-        List<IProcessingNode> Children
+        List<INode> Children
         {
             get;
         }
     }
 
-    public interface IAudioBuffer
+    public interface IInputNode<ResultType> : INode
+    {
+        void Get(ref ResultType resultRef);
+    }
+
+    public interface IOutputNode<ArgumentType> : INode
+    {
+        void Tick();
+    }
+
+    public interface IAudioBuffer<DataType>
     {
         int Length
         {
@@ -45,7 +57,7 @@ namespace Metalshow.Nodes
         int Read(double[] buffer, int length);
     }
 
-    public class SingleAudioBuffer : IAudioBuffer
+    public class SingleAudioBuffer : IAudioBuffer<double[]>
     {
         public SingleAudioBuffer(int capacity)
         {
@@ -65,60 +77,28 @@ namespace Metalshow.Nodes
 
         public void Write( byte[] buffer, int offset, int count )
         {
+            tempValue++;
         }
 
         public int Read( double[] buffer, int length )
         {
-            int tempNumber = 1;
-
-            buffer[0] = 1;
-
-            return tempNumber;
+            buffer[0] = tempValue;
+            return tempValue;
         }
+
+        int tempValue = 0;
     }
 
-    public abstract class AudioTask
+    public class AudioInputNode : IInputNode<float>
     {
-        protected void SetOperation( Func<CancellationToken, Task> op )
+        public AudioInputNode(WaveFormat waveFormat, int deviceIdx)
         {
-            operation = op;
-        }
+            Children = new List<INode>();
 
-        public void Run()
-        {
-            var tokenSource = new CancellationTokenSource();
-            try
-            {
-                operation( tokenSource.Token ).GetAwaiter().GetResult();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine( $"Error during synchronous execution: {e.Message}" );
-                throw;
-            }
-        }
-
-        protected Func<CancellationToken, Task> operation;
-    }
-
-    public class AudioInputTaskNode : IProcessingNode
-    {
-        public AudioInputTaskNode(WaveFormat waveFormat, int deviceIdx)
-        {
             _waveIn = new WaveInEvent { DeviceNumber = deviceIdx, WaveFormat = waveFormat };
             _waveIn.DataAvailable += OnDataAvailable;
 
             _buffer = new SingleAudioBuffer( 2048 );
-        }
-
-        public void Start()
-        {
-            _waveIn.StartRecording();
-        }
-
-        public void Stop()
-        {
-            _waveIn.StopRecording();
         }
 
         public void SetDevice( int deviceIdx )
@@ -126,19 +106,96 @@ namespace Metalshow.Nodes
             _waveIn.DeviceNumber = deviceIdx;
         }
 
-        public int Read( double[] buffer, int length )
-        {
-            int samplesRead = _buffer.Read( buffer, length );
-
-            return samplesRead;
-        }
-
         protected void OnDataAvailable(object sender, WaveInEventArgs args)
         {
             _buffer.Write( args.Buffer, 0, args.Buffer.Length );
-            Console.WriteLine( "Data ready" );
         }
 
+        //INode impl
+        private bool _active;
+        public bool Active
+        {
+            get => _active;
+            set
+            {
+                _active = value;
+                Children.ForEach( child => { child.Active = value; } );
+
+                if( _active )
+                {
+                    _waveIn.StartRecording();
+                }
+                else
+                {
+                    _waveIn.StopRecording();
+                }
+            }
+        }
+
+        private INode _parent;
+        public INode Parent
+        {
+            get => _parent;
+            set
+            {
+                _parent = value;
+                _parent.AddChild( this );
+            }
+        }
+
+        public List<INode> Children
+        {
+            get;
+            private set;
+        }
+
+        public void AddChild( INode childNode )
+        {
+            Children.Add( childNode );
+        }
+
+        public void RemoveChild( INode childNode )
+        {
+            Children.Remove( childNode );
+        }
+
+        public void Delete()
+        {
+            foreach ( INode childNode in Children )
+            {
+                childNode.Delete();
+            }
+
+            if( Parent != null )
+            {
+                Parent.RemoveChild( this );
+            }
+        }
+
+        //IInputNode impl
+        public void Get( ref float resultRef )
+        {
+            resultRef++;
+        }
+
+        WaveInEvent _waveIn;
+        IAudioBuffer<double[]> _buffer;
+    }
+
+    // ui, audio output, console
+    // they look at audio at their own framerate
+    // generic from inodes (args now lets say lowest possible, ideally would match inode output in basic types)
+    // Buffer highest possible
+    // this is streaming, right?
+    abstract public class AudioProcessNode<InputType, OutputType> : IInputNode<InputType>, IOutputNode<OutputType>
+    {
+        public AudioProcessNode()
+        {
+            Children = new List<INode>();
+            Active = false;
+        }
+
+        //INode
         private bool _active;
         public bool Active
         {
@@ -150,31 +207,41 @@ namespace Metalshow.Nodes
             }
         }
 
-        public IProcessingNode Parent
+        private INode _parent;
+        public INode Parent
         {
-            get;
-            protected set;
+            get => _parent;
+            set
+            {
+                _parent = value;
+                _parent.AddChild( this );
+
+                if(value as IInputNode<InputType> != null)
+                {
+                    _node = value as IInputNode<InputType>;
+                }
+            }
         }
 
-        public List<IProcessingNode> Children
+        public List<INode> Children
         {
             get;
             private set;
         }
 
-        public void AddChild( IProcessingNode childNode )
+        public void AddChild( INode childNode )
         {
             Children.Add( childNode );
         }
 
-        public void RemoveChild( IProcessingNode childNode )
+        public void RemoveChild( INode childNode )
         {
             Children.Remove( childNode );
         }
 
         public void Delete()
         {
-            foreach ( IProcessingNode childNode in Children )
+            foreach( INode childNode in Children )
             {
                 childNode.Delete();
             }
@@ -185,59 +252,31 @@ namespace Metalshow.Nodes
             }
         }
 
-        WaveInEvent _waveIn;
-        IAudioBuffer _buffer;
+        //IInputNode
+        public abstract void Get( ref InputType resultRef );
+
+        //IOutputNode
+        public abstract void Tick();
+
+        protected IInputNode<InputType> _node;
+        protected OutputType _output;
     }
 
-    // ui, audio output, console
-    // they look at audio at their own framerate
-    // generic from inodes (args now lets say lowest possible, ideally would match inode output in basic types)
-    // Buffer highest possible
-    // this is streaming, right?
-    public class AudioListener<AudioInputTaskNode, Buffer>
+    public class IncrementingNode : AudioProcessNode<float, float>
     {
-        public AudioListener()
+        public IncrementingNode()
         {
+            _output = 0.0f;
         }
 
-        public void Start()
+        override public void Tick()
         {
-            Active = true;
+            _node.Get( ref _output );
         }
 
-        public void Stop()
+        public override void Get( ref float resultRef )
         {
-            Active = false;
+            resultRef = _output;
         }
-
-        public void Tick()
-        {
-            Console.WriteLine( "AudioListener tick" );
-        }
-
-        public Buffer Get()
-        {
-            return buffer;
-        }
-
-        public void AddNode( AudioInputTaskNode node )
-        {
-            _node = node;
-        }
-
-        public void RemoveNode( AudioInputTaskNode node )
-        {
-            _node = default;
-        }
-
-        public bool Active
-        {
-            get;
-            private set;
-        }
-
-        //bool
-        Buffer buffer; //return buffer we will watch from another thread
-        AudioInputTaskNode _node;
     }
 }

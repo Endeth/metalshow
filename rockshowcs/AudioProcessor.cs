@@ -14,11 +14,11 @@ namespace Metalshow
         public AudioProcessor()
         {
             waveFormat = new WaveFormat( 44100, 16, 1 );
-            _inputNode = new Nodes.AudioInputTaskNode( waveFormat, 0 );
+            _inputNode = new AudioInputNode( waveFormat, 0 );
 
             bufferSize = 1024 * waveFormat.Channels;
-            frameRate = waveFormat.SampleRate / bufferSize;
-            timerInterval = 1000 / frameRate;
+            //frameRate = waveFormat.SampleRate / bufferSize;
+            timerInterval = 500;
 
             mainLoopTimer = new System.Timers.Timer( timerInterval );
             mainLoopTimer.Elapsed += OnMainLoopTick;
@@ -31,12 +31,12 @@ namespace Metalshow
 
             if( _inputNode != null )
             {
-                _inputNode.Start();
+                _inputNode.Active = true;
             }
 
             if(_audioListener != null)
             {
-                _audioListener.Start();
+                _audioListener.Active = true;
             }
         }
 
@@ -44,12 +44,12 @@ namespace Metalshow
         {
             if( _audioListener != null )
             {
-                _audioListener.Stop();
+                _audioListener.Active = false;
             }
 
             if( _inputNode != null )
             {
-                _inputNode.Stop();
+                _inputNode.Active = false;
             }
 
             mainLoopTimer.Stop();
@@ -60,7 +60,6 @@ namespace Metalshow
 
         public void OnMainLoopTick( object source, ElapsedEventArgs args )
         {
-            Console.WriteLine( $"Timer go {args.SignalTime}" );
             if( Active )
             {
                 if( _audioListener != null )
@@ -68,6 +67,15 @@ namespace Metalshow
                     _audioListener.Tick();
                 }
             }
+        }
+
+        public void CreateInput( int id )
+        {
+            if( _inputNode == null )
+            {
+                return;
+            }
+            _inputNode = new Nodes.AudioInputNode( waveFormat, 0 );
         }
 
         public void SetInputDevice( int id )
@@ -80,13 +88,13 @@ namespace Metalshow
             _inputNode.SetDevice( id );
         }
 
-        public void AddNode( AudioListener<AudioInputTaskNode, bool> node )
+        public void AddNode( IncrementingNode node )
         {
-            node.AddNode( _inputNode );
+            node.Parent = _inputNode;
             _audioListener = node;
         }
 
-        public void RemoveNode( AudioListener<AudioInputTaskNode, bool> node )
+        public void RemoveNode( IncrementingNode node )
         {
             _audioListener = null;
         }
@@ -174,8 +182,8 @@ namespace Metalshow
             return samplesRead;
         }*/
 
-        private Nodes.AudioInputTaskNode _inputNode;
-        private AudioListener<AudioInputTaskNode, bool> _audioListener;
+        private Nodes.AudioInputNode _inputNode;
+        private IncrementingNode _audioListener;
 
         //private AudioDeviceInputStream inputStream;
         //private List<IOutputStream> outputStreams;

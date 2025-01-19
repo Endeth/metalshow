@@ -16,10 +16,7 @@ namespace Metalshow.Controls
         {
             InitializeComponent();
 
-            width = 640;
-            height = 480;
             Name = "Spectogram";
-            Type = OutputType.Loudness;
         }
 
         override public void AdjustParentForm( GfxOutputForm parent )

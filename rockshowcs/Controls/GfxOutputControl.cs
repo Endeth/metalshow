@@ -14,21 +14,17 @@ namespace Metalshow
 
         virtual public void AdjustParentForm( GfxOutputForm parent )
         {
-            parent.MinimumSize = new Size(width, height);
-            parent.MaximumSize = new Size(width, height);
+            parent.MinimumSize = new Size( Size.Width, Size.Height );
+            parent.MaximumSize = new Size( Size.Width, Size.Height );
 
             parent.FormBorderStyle = FormBorderStyle.FixedSingle;
 
             parent.Text = Name;
+
+            parent.Controls.Add( this );
         }
 
         public string OutputName
-        {
-            get;
-            protected set;
-        }
-
-        public OutputType Type
         {
             get;
             protected set;
@@ -41,9 +37,6 @@ namespace Metalshow
         virtual public void Cleanup()
         {
         }
-
-        protected int width;
-        protected int height;
     }
 
     public enum OutputType
